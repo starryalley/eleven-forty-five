@@ -1,0 +1,76 @@
+<drawables>
+    <bitmap id="LauncherIcon" filename="launcher_icon.png" />
+    <bitmap id="hour_23" filename="hour_23.png" />
+    <bitmap id="hour_00" filename="hour_00.png" />
+    <bitmap id="hour_01" filename="hour_01.png" />
+    <bitmap id="hour_02" filename="hour_02.png" />
+    <bitmap id="hour_03" filename="hour_03.png" />
+    <bitmap id="hour_04" filename="hour_04.png" />
+    <bitmap id="hour_05" filename="hour_05.png" />
+    <bitmap id="hour_06" filename="hour_06.png" />
+    <bitmap id="hour_07" filename="hour_07.png" />
+    <bitmap id="hour_08" filename="hour_08.png" />
+    <bitmap id="hour_09" filename="hour_09.png" />
+    <bitmap id="hour_10" filename="hour_10.png" />
+    <bitmap id="hour_11" filename="hour_11.png" />
+    <bitmap id="hour_12" filename="hour_12.png" />
+    <bitmap id="hour_13" filename="hour_13.png" />
+    <bitmap id="hour_14" filename="hour_14.png" />
+    <bitmap id="hour_15" filename="hour_15.png" />
+    <bitmap id="hour_16" filename="hour_16.png" />
+    <bitmap id="hour_17" filename="hour_17.png" />
+    <bitmap id="hour_18" filename="hour_18.png" />
+    <bitmap id="hour_19" filename="hour_19.png" />
+    <bitmap id="hour_20" filename="hour_20.png" />
+    <bitmap id="hour_21" filename="hour_21.png" />
+    <bitmap id="hour_22" filename="hour_22.png" />
+    
+    <bitmap id="hour_alt_23" filename="hour_alt_23.png" />
+    <bitmap id="hour_alt_01" filename="hour_alt_01.png" />
+    <bitmap id="hour_alt_03" filename="hour_alt_03.png" />
+    <bitmap id="hour_alt_05" filename="hour_alt_05.png" />
+    <bitmap id="hour_alt_07" filename="hour_alt_07.png" />
+    <bitmap id="hour_alt_09" filename="hour_alt_09.png" />
+    <bitmap id="hour_alt_11" filename="hour_alt_11.png" />
+    <bitmap id="hour_alt_13" filename="hour_alt_13.png" />
+    <bitmap id="hour_alt_15" filename="hour_alt_15.png" />
+    <bitmap id="hour_alt_17" filename="hour_alt_17.png" />
+    <bitmap id="hour_alt_19" filename="hour_alt_19.png" />
+    <bitmap id="hour_alt_21" filename="hour_alt_21.png" />
+    
+    <bitmap id="hour_night_19" filename="hour_night_19.png" />
+    <bitmap id="hour_night_21" filename="hour_night_21.png" />
+    <bitmap id="hour_night_23" filename="hour_night_23.png" />
+    <bitmap id="hour_night_01" filename="hour_night_01.png" />
+    <bitmap id="hour_night_03" filename="hour_night_03.png" />
+    
+    <bitmap id="minute_15" filename="minute_15.png" />
+    <bitmap id="minute_30" filename="minute_30.png" />
+    <bitmap id="minute_45" filename="minute_45.png" />
+    <bitmap id="minute_60" filename="minute_60.png" />
+    
+    <bitmap id="solarterm_0" filename="solarterm_0.png" />
+    <bitmap id="solarterm_15" filename="solarterm_15.png" />
+    <bitmap id="solarterm_30" filename="solarterm_30.png" />
+    <bitmap id="solarterm_45" filename="solarterm_45.png" />
+    <bitmap id="solarterm_60" filename="solarterm_60.png" />
+    <bitmap id="solarterm_75" filename="solarterm_75.png" />
+    <bitmap id="solarterm_90" filename="solarterm_90.png" />
+    <bitmap id="solarterm_105" filename="solarterm_105.png" />
+    <bitmap id="solarterm_120" filename="solarterm_120.png" />
+    <bitmap id="solarterm_135" filename="solarterm_135.png" />
+    <bitmap id="solarterm_150" filename="solarterm_150.png" />
+    <bitmap id="solarterm_165" filename="solarterm_165.png" />
+    <bitmap id="solarterm_180" filename="solarterm_180.png" />
+    <bitmap id="solarterm_195" filename="solarterm_195.png" />
+    <bitmap id="solarterm_210" filename="solarterm_210.png" />
+    <bitmap id="solarterm_225" filename="solarterm_225.png" />
+    <bitmap id="solarterm_240" filename="solarterm_240.png" />
+    <bitmap id="solarterm_255" filename="solarterm_255.png" />
+    <bitmap id="solarterm_270" filename="solarterm_270.png" />
+    <bitmap id="solarterm_285" filename="solarterm_285.png" />
+    <bitmap id="solarterm_300" filename="solarterm_300.png" />
+    <bitmap id="solarterm_315" filename="solarterm_315.png" />
+    <bitmap id="solarterm_330" filename="solarterm_330.png" />
+    <bitmap id="solarterm_345" filename="solarterm_345.png" />
+</drawables>

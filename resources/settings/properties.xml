@@ -1,0 +1,8 @@
+<properties>
+
+    <property id="BackgroundColor" type="number">0x000000</property>
+    <property id="HourColor" type="number">0x808080</property>
+    <property id="MinuteColor" type="number">0xEEEEEE</property>
+    <property id="ShowDate" type="boolean">true</property>
+
+</properties>
