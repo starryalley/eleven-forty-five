@@ -3,21 +3,10 @@ using Toybox.Time.Gregorian;
 using Toybox.Math;
 using Toybox.System;
 
-// https://en.wikipedia.org/wiki/Julian_day#Julian_day_number_calculation
-function julianDateNumber(Y, M, D) {
-    return (1461*(Y+4800+(M-14)/12))/4 +
-        (367*(M-2-12*((M-14)/12)))/12 -
-        (3*((Y+4900+(M-14)/12)/100))/4 +
-        D - 32075;
-}
+const UnixEpochJulianDate = 2440587.5;
 
 function JDN(dateTime) {
-    // convert to UTC time
-    var time = Gregorian.utcInfo(dateTime, Time.FORMAT_SHORT);
-    return julianDateNumber(time.year, time.month, time.day) +
-        (time.hour-12)/24.0 +
-        time.min/1440.0 +
-        time.sec/86400.0;
+    return dateTime.value().toFloat()/86400 + UnixEpochJulianDate;
 }
 
 function normalizeAngle(a) {
