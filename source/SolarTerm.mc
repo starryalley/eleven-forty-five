@@ -34,9 +34,8 @@ function GetClosestSolarTerm(lon) {
     var future = past + 15;
     if ((future - lon) < (lon - past)) {
         var diff = ((future-lon)*365.0/360).toNumber();
-        // close to future
-        System.println("Next Solar Term:" + future + " [In " + ((future-lon)*365.0/360) + "days]");
-        return [normalizeAngle(future), diff];
+        System.println("Next Solar Term:" + normalizeAngle(future).toNumber() + " [In " + ((future-lon)*365.0/360) + "days]");
+        return [normalizeAngle(future).toNumber(), diff];
     } else {
         var diff = ((lon-past)*365.0/360).toNumber();
         System.println("Previous Solar Term:" + past + " [" + ((lon-past)*365.0/360) + "days ago]");
