@@ -5,8 +5,8 @@ using Toybox.System;
 
 const UnixEpochJulianDate = 2440587.5;
 
-function JDN(dateTime) {
-    return dateTime.value().toFloat()/86400 + UnixEpochJulianDate;
+function JDN(t) {
+    return t.value().toDouble()/86400.0 + UnixEpochJulianDate;
 }
 
 function normalizeAngle(a) {
@@ -33,12 +33,12 @@ function GetClosestSolarTerm(lon) {
     var past = lon.toNumber() / 15 * 15;
     var future = past + 15;
     if ((future - lon) < (lon - past)) {
-        var diff = ((future-lon)*365.0/360).toNumber();
-        System.println("Next Solar Term:" + normalizeAngle(future).toNumber() + " [In " + ((future-lon)*365.0/360) + "days]");
+        var diff = Math.round((future-lon)*365.0/360).toNumber();
+        System.println("Ecliptic Longitude: " + lon + ", Next Solar Term:" + normalizeAngle(future).toNumber() + " [In " + ((future-lon)*365.0/360) + " days]");
         return [normalizeAngle(future).toNumber(), diff];
     } else {
-        var diff = ((lon-past)*365.0/360).toNumber();
-        System.println("Previous Solar Term:" + past + " [" + ((lon-past)*365.0/360) + "days ago]");
+        var diff = Math.round((lon-past)*365.0/360).toNumber();
+        System.println("Ecliptic Longitude: " + lon + ", Previous Solar Term:" + past + " [" + ((lon-past)*365.0/360) + " days ago]");
         return [past, -diff];
     }
 }
