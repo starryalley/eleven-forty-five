@@ -7,7 +7,15 @@ using Toybox.Time;
 using Toybox.Time.Gregorian;
 
 class elevenfortyfiveView extends WatchUi.WatchFace {
+    hidden var width;
+    hidden var height;
     hidden var northHemisphere = true;
+    hidden var bitmap_hour;
+    hidden var bitmap_althour;
+    hidden var bitmap_nighthour;
+    hidden var bitmap_minute;
+    hidden var bitmap_term;
+    hidden var text_term = "";
 
     function initialize() {
         WatchFace.initialize();
@@ -16,6 +24,8 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     // Load your resources here
     function onLayout(dc) {
         setLayout(Rez.Layouts.WatchFace(dc));
+        width = dc.getWidth();
+        height = dc.getHeight();
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -26,8 +36,7 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
 
     // Update the view
     function onUpdate(dc) {
-        var width = dc.getWidth();
-        var height = dc.getHeight();
+        // update hemisphere if we have last activity's location
         var curLoc = Activity.getActivityInfo().currentLocation;
         if (curLoc != null) {
             var lat= curLoc.toDegrees()[0].toFloat();
@@ -43,11 +52,109 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         View.onUpdate(dc);
 
         var clockTime = System.getClockTime();
-        var hours = clockTime.hour;
-        var bitmap_hour;
-        var bitmap_althour;
-        var bitmap_nighthour = null;
-        switch (hours) {
+        //if (bitmap_hour == null || clockTime.min == 0) {
+        System.println("Updating hour png");
+        updateHourBitmap(clockTime.hour);
+        updateSolarTermAndDate();
+        //}
+
+        //if (bitmap_minute == null || clockTime.min % 15 == 0) {
+        System.println("Updating minute png");
+        updateMinuteBitmap(clockTime.min);
+	    //}
+
+        // alternative name on top
+        dc.drawBitmap(width/2-30, 10, bitmap_althour);
+
+        // night name on top, below alternative name
+        if (bitmap_nighthour != null) {
+            dc.drawBitmap(width/2-30, 40, bitmap_nighthour);
+        }
+
+        // modern hour/minute clock on the left
+        dc.setColor(Application.getApp().getProperty("HourColor"), Graphics.COLOR_TRANSPARENT);
+        dc.drawText(30, height/2-20, Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.hour]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+        dc.setColor(Application.getApp().getProperty("MinuteColor"), Graphics.COLOR_TRANSPARENT);
+        dc.drawText(30, height/2+20, Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+
+        // old Chinese clock hour on the right
+        dc.drawBitmap(width-85, height/2-30, bitmap_hour);
+        dc.drawBitmap(width-85, height/2, bitmap_minute);
+
+        // show modern date on bottom, above solar term
+        if (Application.getApp().getProperty("ShowDate")) {
+	        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+	        var dateString = Lang.format(
+	            "$1$ $2$ $3$", [today.day_of_week, today.day, today.month]
+	        );
+            dc.drawText(width/2, height - 75, Graphics.FONT_XTINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);
+        }
+        // solar term on bottom
+        if (bitmap_term != null) {
+            dc.drawBitmap(width/2-30, height-55, bitmap_term);
+        }
+        // show xx days ago or in xx days
+        if (text_term.length() > 0) {
+            dc.drawText(width/2, height-25, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
+        }
+    }
+
+	function GetSolarTermResource(lon) {
+	    switch (lon) {
+	    case 0:
+	        return Rez.Drawables.solarterm_0;
+	    case 15:
+	        return Rez.Drawables.solarterm_15;
+	    case 30:
+	        return Rez.Drawables.solarterm_30;
+	    case 45:
+	        return Rez.Drawables.solarterm_45;
+	    case 60:
+	        return Rez.Drawables.solarterm_60;
+	    case 75:
+	        return Rez.Drawables.solarterm_75;
+	    case 90:
+	        return Rez.Drawables.solarterm_90;
+	    case 105:
+	        return Rez.Drawables.solarterm_105;
+	    case 120:
+	        return Rez.Drawables.solarterm_120;
+	    case 135:
+	        return Rez.Drawables.solarterm_135;
+	    case 150:
+	        return Rez.Drawables.solarterm_150;
+	    case 165:
+	        return Rez.Drawables.solarterm_165;
+	    case 180:
+	        return Rez.Drawables.solarterm_180;
+	    case 195:
+	        return Rez.Drawables.solarterm_195;
+	    case 210:
+	        return Rez.Drawables.solarterm_210;
+	    case 225:
+	        return Rez.Drawables.solarterm_225;
+	    case 240:
+	        return Rez.Drawables.solarterm_240;
+	    case 255:
+	        return Rez.Drawables.solarterm_255;
+	    case 270:
+	        return Rez.Drawables.solarterm_270;
+	    case 285:
+	        return Rez.Drawables.solarterm_285;
+	    case 300:
+	        return Rez.Drawables.solarterm_300;
+	    case 315:
+	        return Rez.Drawables.solarterm_315;
+	    case 330:
+	        return Rez.Drawables.solarterm_330;
+	    case 345:
+	        return Rez.Drawables.solarterm_345;
+	    }
+	}
+
+    function updateHourBitmap(hour) {
+        bitmap_nighthour = null;
+        switch (hour) {
             case 0:
                 bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_00);
                 bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_23);
@@ -155,9 +262,9 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
                 bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_23);
                 break;
         }
+    }
 
-        var minutes = clockTime.min;
-        var bitmap_minute;
+    function updateMinuteBitmap(minutes) {
         if (minutes < 15) {
             bitmap_minute = WatchUi.loadResource(Rez.Drawables.minute_15);
         } else if (minutes < 30) {
@@ -167,58 +274,47 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         } else {
             bitmap_minute = WatchUi.loadResource(Rez.Drawables.minute_60);
         }
+    }
 
-        // modern hour/minute clock on the left
-        dc.setColor(Application.getApp().getProperty("HourColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(30, height/2-30, Graphics.FONT_LARGE, Lang.format("$1$", [hours]), Graphics.TEXT_JUSTIFY_LEFT);
-        dc.setColor(Application.getApp().getProperty("MinuteColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(30, height/2, Graphics.FONT_LARGE, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_LEFT);
-
-        // old Chinese clock on the right
-        dc.drawBitmap(width-80, height/2-30, bitmap_hour);
-        dc.drawBitmap(width-80, height/2, bitmap_minute);
-
-        // alternative name on top
-        dc.drawBitmap(width/2-30, 10, bitmap_althour);
-
-        // night name on top, below alternative name
-        if (bitmap_nighthour != null) {
-            dc.drawBitmap(width/2-30, 40, bitmap_nighthour);
-        }
-
+    function updateSolarTermAndDate() {
         var jdn = JDN(Time.now());
         var lon = EclipticLongitude(jdn);
         if (!northHemisphere) {
             System.println("Reverse Solar Term for south hemisphere");
             lon = normalizeAngle(lon + 180);
         }
-        //System.println(jdn + ", " + lon);
+
         var term = GetClosestSolarTerm(lon);
         if (term[1] > 0) {
             // in xx days
-            dc.drawText(width/2, height-25, Graphics.FONT_XTINY, "in " + term[1] + " days", Graphics.TEXT_JUSTIFY_CENTER);
+            text_term = "in " + term[1];
+            if (term[1] == 1) {
+                text_term += " day";
+            } else {
+                text_term += " days";
+            }
         } else if (term[1] < 0) {
             // xx days ago
-            dc.drawText(width/2, height-25, Graphics.FONT_XTINY, (-term[1]) + " days ago", Graphics.TEXT_JUSTIFY_CENTER);
+            text_term = (-term[1]) + " ";
+            if (-term[1] == 1) {
+                text_term += "day ago";
+            } else {
+                text_term += "days ago";
+            }
+        } else {
+            text_term = "";
         }
-        var bitmap_term = WatchUi.loadResource(GetSolarTermResource(term[0]));
-        if (bitmap_term != null) {
-            dc.drawBitmap(width/2-30, height-55, bitmap_term);
-        }
-        // show modern date above solar term
-        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-        var dateString = Lang.format(
-            "$1$ $2$ $3$", [today.day_of_week, today.day, today.month]
-        );
-        if (Application.getApp().getProperty("ShowDate")) {
-            dc.drawText(width/2, height - 75, Graphics.FONT_XTINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);
-        }
+        bitmap_term = WatchUi.loadResource(GetSolarTermResource(term[0]));
     }
 
     // Called when this View is removed from the screen. Save the
     // state of this View here. This includes freeing resources from
     // memory.
     function onHide() {
+        bitmap_hour = null;
+        bitmap_althour = null;
+        bitmap_nighthour = null;
+        bitmap_minute = null;
     }
 
     // The user has just looked at their watch. Timers and animations may be started here.

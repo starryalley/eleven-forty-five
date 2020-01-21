@@ -35,64 +35,11 @@ function GetClosestSolarTerm(lon) {
     if ((future - lon) < (lon - past)) {
         var diff = ((future-lon)*365.0/360).toNumber();
         // close to future
-        System.println("Next Solar Term:" + future + " [In " + diff + "days]");
+        System.println("Next Solar Term:" + future + " [In " + ((future-lon)*365.0/360) + "days]");
         return [normalizeAngle(future), diff];
     } else {
         var diff = ((lon-past)*365.0/360).toNumber();
-        System.println("Previous Solar Term:" + past + " [" + diff + "days ago]");
+        System.println("Previous Solar Term:" + past + " [" + ((lon-past)*365.0/360) + "days ago]");
         return [past, -diff];
-    }
-}
-
-function GetSolarTermResource(lon) {
-    switch (lon) {
-    case 0:
-        return Rez.Drawables.solarterm_0;
-    case 15:
-        return Rez.Drawables.solarterm_15;
-    case 30:
-        return Rez.Drawables.solarterm_30;
-    case 45:
-        return Rez.Drawables.solarterm_45;
-    case 60:
-        return Rez.Drawables.solarterm_60;
-    case 75:
-        return Rez.Drawables.solarterm_75;
-    case 90:
-        return Rez.Drawables.solarterm_90;
-    case 105:
-        return Rez.Drawables.solarterm_105;
-    case 120:
-        return Rez.Drawables.solarterm_120;
-    case 135:
-        return Rez.Drawables.solarterm_135;
-    case 150:
-        return Rez.Drawables.solarterm_150;
-    case 165:
-        return Rez.Drawables.solarterm_165;
-    case 180:
-        return Rez.Drawables.solarterm_180;
-    case 195:
-        return Rez.Drawables.solarterm_195;
-    case 210:
-        return Rez.Drawables.solarterm_210;
-    case 225:
-        return Rez.Drawables.solarterm_225;
-    case 240:
-        return Rez.Drawables.solarterm_240;
-    case 255:
-        return Rez.Drawables.solarterm_255;
-    case 270:
-        return Rez.Drawables.solarterm_270;
-    case 285:
-        return Rez.Drawables.solarterm_285;
-    case 300:
-        return Rez.Drawables.solarterm_300;
-    case 315:
-        return Rez.Drawables.solarterm_315;
-    case 330:
-        return Rez.Drawables.solarterm_330;
-    case 345:
-        return Rez.Drawables.solarterm_345;
     }
 }

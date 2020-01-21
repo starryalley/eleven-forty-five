@@ -1,5 +1,6 @@
 <settings>
 
+    <!-- 
     <setting propertyKey="@Properties.HourColor" title="@Strings.HourColorTitle">
         <settingConfig type="list">
             <listEntry value="0x000000">@Strings.ColorBlack</listEntry>
@@ -17,7 +18,7 @@
             <listEntry value="0xFFFFFF">@Strings.ColorWhite</listEntry>
         </settingConfig>
     </setting>
-
+     -->
     <setting propertyKey="@Properties.ShowDate" title="@Strings.ShowDateTitle">
         <settingConfig type="boolean" />
     </setting>
