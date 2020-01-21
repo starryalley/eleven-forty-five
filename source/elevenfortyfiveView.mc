@@ -7,6 +7,7 @@ using Toybox.Time;
 using Toybox.Time.Gregorian;
 
 class elevenfortyfiveView extends WatchUi.WatchFace {
+    hidden var northHemisphere = true;
 
     function initialize() {
         WatchFace.initialize();
@@ -27,13 +28,14 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     function onUpdate(dc) {
         var width = dc.getWidth();
         var height = dc.getHeight();
-        var northHemisphere = true;
         var curLoc = Activity.getActivityInfo().currentLocation;
         if (curLoc != null) {
             var lat= curLoc.toDegrees()[0].toFloat();
             System.println("Current Latitude:" + lat);
             if (lat < 0) {
                 northHemisphere = false;
+            } else {
+                northHemisphere = true;
             }
         }
 
