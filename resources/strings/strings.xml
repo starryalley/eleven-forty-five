@@ -5,6 +5,7 @@
     <string id="HourColorTitle">Hour Color</string>
     <string id="MinuteColorTitle">Minute Color</string>
     <string id="ShowDateTitle">Show Date</string>
+    <string id="SouthHemisphereTitle">Southern Hemisphere Solar Term</string>
 
     <string id="ColorBlack">Black</string>
     <string id="ColorDarkGray">Dark Gray</string>

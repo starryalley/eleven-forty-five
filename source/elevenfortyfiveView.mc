@@ -36,17 +36,25 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
 
     // Update the view
     function onUpdate(dc) {
+        // not using last GPS position which isn't quite reliable
+        /*
         // update hemisphere if we have last activity's location
-        var curLoc = Activity.getActivityInfo().currentLocation;
-        if (curLoc != null) {
-            var lat= curLoc.toDegrees()[0].toFloat();
-            System.println("Current Latitude:" + lat);
-            if (lat < 0) {
-                northHemisphere = false;
-            } else {
-                northHemisphere = true;
+        var locAccuracy = Activity.getActivityInfo().currentLocationAccuracy;
+        if (locAccuracy == Position.QUALITY_LAST_KNOWN ||
+                locAccuracy == Position.QUALITY_GOOD) {
+            var curLoc = Activity.getActivityInfo().currentLocation;
+            if (curLoc != null) {
+                var lat= curLoc.toDegrees()[0].toFloat();
+                System.println("Current Latitude:" + lat);
+                if (lat < 0) {
+                    northHemisphere = false;
+                } else {
+                    northHemisphere = true;
+                }
             }
         }
+        */
+        northHemisphere = !Application.getApp().getProperty("SouthHemisphere");
 
         // Call the parent onUpdate function to redraw the layout
         View.onUpdate(dc);

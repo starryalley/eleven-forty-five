@@ -22,5 +22,8 @@
     <setting propertyKey="@Properties.ShowDate" title="@Strings.ShowDateTitle">
         <settingConfig type="boolean" />
     </setting>
+    <setting propertyKey="@Properties.SouthHemisphere" title="@Strings.SouthHemisphereTitle">
+        <settingConfig type="boolean" />
+    </setting>
 
 </settings>
