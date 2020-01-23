@@ -4,6 +4,9 @@
     <property id="HourColor" type="number">0x808080</property>
     <property id="MinuteColor" type="number">0xEEEEEE</property>
     <property id="ShowDate" type="boolean">true</property>
+    <property id="ShowHeartRate" type="boolean">true</property>
+    <property id="ShowBattery" type="boolean">true</property>
+    <property id="ShowDaysToTerm" type="boolean">true</property>
     <property id="SouthHemisphere" type="boolean">false</property>
 
 </properties>

@@ -22,6 +22,15 @@
     <setting propertyKey="@Properties.ShowDate" title="@Strings.ShowDateTitle">
         <settingConfig type="boolean" />
     </setting>
+    <setting propertyKey="@Properties.ShowHeartRate" title="@Strings.ShowHeartRateTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.ShowBattery" title="@Strings.ShowBatteryTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.ShowDaysToTerm" title="@Strings.ShowDaysToTermTitle">
+        <settingConfig type="boolean" />
+    </setting>
     <setting propertyKey="@Properties.SouthHemisphere" title="@Strings.SouthHemisphereTitle">
         <settingConfig type="boolean" />
     </setting>

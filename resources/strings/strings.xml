@@ -5,6 +5,9 @@
     <string id="HourColorTitle">Hour Color</string>
     <string id="MinuteColorTitle">Minute Color</string>
     <string id="ShowDateTitle">Show Date</string>
+    <string id="ShowHeartRateTitle">Show Heart Rate</string>
+    <string id="ShowBatteryTitle">Show Battery Percentage</string>
+    <string id="ShowDaysToTermTitle">Show Days before/after Solar Term</string>
     <string id="SouthHemisphereTitle">Southern Hemisphere Solar Term</string>
 
     <string id="ColorBlack">Black</string>

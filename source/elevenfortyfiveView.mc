@@ -9,6 +9,7 @@ using Toybox.Time.Gregorian;
 class elevenfortyfiveView extends WatchUi.WatchFace {
     hidden var width;
     hidden var height;
+    hidden var textHeight;
     hidden var northHemisphere = true;
     hidden var bitmap_hour;
     hidden var bitmap_althour;
@@ -26,6 +27,7 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         setLayout(Rez.Layouts.WatchFace(dc));
         width = dc.getWidth();
         height = dc.getHeight();
+        textHeight = dc.getFontHeight(Graphics.Graphics.FONT_XTINY);
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -36,6 +38,8 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
 
     // Update the view
     function onUpdate(dc) {
+        // this is necessary as some watch may still be using the clip rectangle set in onPartialUpdate()
+        dc.setClip(0, 0, width, height);
         // not using last GPS position which isn't quite reliable
         /*
         // update hemisphere if we have last activity's location
@@ -72,38 +76,69 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
 	    //}
 
         // alternative name on top
-        dc.drawBitmap(width/2-30, 10, bitmap_althour);
+        dc.drawBitmap(width/2-30, 15, bitmap_althour);
 
         // night name on top, below alternative name
         if (bitmap_nighthour != null) {
-            dc.drawBitmap(width/2-30, 40, bitmap_nighthour);
+            dc.drawBitmap(width/2-30, 45, bitmap_nighthour);
         }
 
         // modern hour/minute clock on the left
+        var offset = dc.getFontHeight(Graphics.FONT_NUMBER_MEDIUM)/3;
+        if (height <= 200) {
+            offset += 5;
+        }
         dc.setColor(Application.getApp().getProperty("HourColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(30, height/2-20, Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.hour]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(30, height/2-offset, Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.hour]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
         dc.setColor(Application.getApp().getProperty("MinuteColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(30, height/2+20, Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(30, height/2+offset, Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
 
         // old Chinese clock hour on the right
         dc.drawBitmap(width-85, height/2-30, bitmap_hour);
         dc.drawBitmap(width-85, height/2, bitmap_minute);
 
         // show modern date on bottom, above solar term
+        var spaceHeight = textHeight/5;
+        if (height <= 200) {
+            spaceHeight = 0;
+        }
+        var startY = height - textHeight * 2 - spaceHeight * 3 - 30;
+        System.println("screen height:" + height + ", tiny text height:" + textHeight);
         if (Application.getApp().getProperty("ShowDate")) {
 	        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
 	        var dateString = Lang.format(
 	            "$1$ $2$ $3$", [today.day_of_week, today.day, today.month]
 	        );
-            dc.drawText(width/2, height - 75, Graphics.FONT_XTINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(width/2, startY, Graphics.FONT_XTINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // solar term on bottom
         if (bitmap_term != null) {
-            dc.drawBitmap(width/2-30, height-55, bitmap_term);
+            dc.drawBitmap(width/2-30, startY + textHeight + spaceHeight, bitmap_term);
         }
         // show xx days ago or in xx days
-        if (text_term.length() > 0) {
-            dc.drawText(width/2, height-25, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
+        if (text_term.length() > 0 && Application.getApp().getProperty("ShowDaysToTerm")) {
+            dc.drawText(width/2, startY + textHeight + spaceHeight + 30, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
+        }
+        // show battery
+        if (Application.getApp().getProperty("ShowBattery")) {
+            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(width - width/5, height - height/5, Graphics.FONT_XTINY, System.getSystemStats().battery.toNumber() + "%",
+                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        }
+    }
+
+    function onPartialUpdate(dc) {
+        if (Application.getApp().getProperty("ShowHeartRate")) {
+            dc.setClip(width/5 - textHeight/2, height - height/5 - textHeight/2, textHeight*2, textHeight);
+            dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
+            dc.clear();
+            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+            var hr = Activity.getActivityInfo().currentHeartRate;
+            if (hr == null) {
+                hr = "--";
+            }
+	        dc.drawText(width/5, height - height/5, Graphics.FONT_XTINY, hr,
+	                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
     }
 
