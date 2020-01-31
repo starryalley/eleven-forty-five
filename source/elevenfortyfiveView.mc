@@ -17,9 +17,16 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     hidden var bitmap_minute;
     hidden var bitmap_term;
     hidden var text_term = "";
+    hidden var isAwake;
+    hidden var lastUpdatedTs = 0;
+    hidden var screenShape;
+    hidden var borderWidth = 15;
+    hidden var partialUpdateAllowed = false;
 
     function initialize() {
         WatchFace.initialize();
+        partialUpdateAllowed = (Toybox.WatchUi.WatchFace has :onPartialUpdate);
+        System.println("Partial update allowed:" + partialUpdateAllowed);
     }
 
     // Load your resources here
@@ -28,6 +35,25 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         width = dc.getWidth();
         height = dc.getHeight();
         textHeight = dc.getFontHeight(Graphics.Graphics.FONT_XTINY);
+        screenShape = System.getDeviceSettings().screenShape;
+        var smallSide = height;
+        if (width < height) {
+            smallSide = width;
+        }
+        if (smallSide < 200) {
+            borderWidth = 3;
+        } else if (smallSide < 210) {
+            borderWidth = 10;
+        } else if (smallSide < 270) {
+            borderWidth = 25;
+        } else if (smallSide < 300) {
+            borderWidth = 35;
+        } else {
+            borderWidth = 45;
+        }
+
+        System.println("screen width:" + width + ",height:" + height + ",shape:" + screenShape +
+            ",tiny text height:" + textHeight + ",borderWidth:" + borderWidth);
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -39,7 +65,9 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     // Update the view
     function onUpdate(dc) {
         // this is necessary as some watch may still be using the clip rectangle set in onPartialUpdate()
-        dc.setClip(0, 0, width, height);
+        if (Graphics.Dc has :setClip) {
+            dc.setClip(0, 0, width, height);
+        }
         // not using last GPS position which isn't quite reliable
         /*
         // update hemisphere if we have last activity's location
@@ -65,45 +93,57 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
 
         var clockTime = System.getClockTime();
         //if (bitmap_hour == null || clockTime.min == 0) {
-        System.println("Updating hour png");
+        //System.println("Updating hour png");
         updateHourBitmap(clockTime.hour);
         updateSolarTermAndDate();
         //}
 
         //if (bitmap_minute == null || clockTime.min % 15 == 0) {
-        System.println("Updating minute png");
+        //System.println("Updating minute png");
         updateMinuteBitmap(clockTime.min);
 	    //}
 
         // alternative name on top
-        dc.drawBitmap(width/2-30, 15, bitmap_althour);
+        dc.drawBitmap(width/2-30, borderWidth, bitmap_althour);
 
         // night name on top, below alternative name
         if (bitmap_nighthour != null) {
-            dc.drawBitmap(width/2-30, 45, bitmap_nighthour);
+            dc.drawBitmap(width/2-30, borderWidth + 30, bitmap_nighthour);
         }
 
         // modern hour/minute clock on the left
+        var semiXOffset = 0;
+        if (screenShape == System.SCREEN_SHAPE_SEMI_ROUND) {
+            semiXOffset = 5;
+        }
         var offset = dc.getFontHeight(Graphics.FONT_NUMBER_MEDIUM)/3;
         if (height <= 200) {
             offset += 5;
         }
+        var hours = clockTime.hour;
+        if (!System.getDeviceSettings().is24Hour && hours > 12) {
+            hours = hours - 12;
+        }
         dc.setColor(Application.getApp().getProperty("HourColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(30, height/2-offset, Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.hour]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(borderWidth + semiXOffset, height/2-offset + Application.getApp().getProperty("HourDigitYOffset"), Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [hours]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
         dc.setColor(Application.getApp().getProperty("MinuteColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(30, height/2+offset, Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(borderWidth + semiXOffset, height/2+offset + Application.getApp().getProperty("MinuteDigitYOffset"), Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
 
         // old Chinese clock hour on the right
-        dc.drawBitmap(width-85, height/2-30, bitmap_hour);
-        dc.drawBitmap(width-85, height/2, bitmap_minute);
+        dc.drawBitmap(width-borderWidth - 60 - semiXOffset, height/2-30, bitmap_hour);
+        dc.drawBitmap(width-borderWidth - 60 - semiXOffset, height/2, bitmap_minute);
 
         // show modern date on bottom, above solar term
         var spaceHeight = textHeight/5;
-        if (height <= 200) {
+        if (height <= 210) {
             spaceHeight = 0;
         }
-        var startY = height - textHeight * 2 - spaceHeight * 3 - 30;
-        System.println("screen height:" + height + ", tiny text height:" + textHeight);
+        spaceHeight += Application.getApp().getProperty("BottomInfoSpaceOffset");
+        var startY = height - textHeight * 2 - spaceHeight - borderWidth/2 - 30 + Application.getApp().getProperty("BottomInfoOffset");
+        if (screenShape == System.SCREEN_SHAPE_SEMI_ROUND) {
+            startY -= (width-height);
+        }
+
         if (Application.getApp().getProperty("ShowDate")) {
 	        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
 	        var dateString = Lang.format(
@@ -117,7 +157,7 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         }
         // show xx days ago or in xx days
         if (text_term.length() > 0 && Application.getApp().getProperty("ShowDaysToTerm")) {
-            dc.drawText(width/2, startY + textHeight + spaceHeight + 30, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(width/2, startY + textHeight + spaceHeight * 2 + 30, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // show battery
         if (Application.getApp().getProperty("ShowBattery")) {
@@ -125,17 +165,27 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             dc.drawText(width - width/5, height - height/5, Graphics.FONT_XTINY, System.getSystemStats().battery.toNumber() + "%",
                 Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
+        // show heart rate
+        //onPartialUpdate(dc);
     }
 
     function onPartialUpdate(dc) {
         if (Application.getApp().getProperty("ShowHeartRate")) {
-            dc.setClip(width/5 - textHeight/2, height - height/5 - textHeight/2, textHeight*2, textHeight);
+            if (Graphics.Dc has :setClip) {
+                dc.setClip(width/5 - textHeight/2, height - height/5 - textHeight/2, textHeight*2, textHeight);
+            }
             dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
             dc.clear();
             dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
             var hr = Activity.getActivityInfo().currentHeartRate;
             if (hr == null) {
-                hr = "--";
+                var hrHistory = ActivityMonitor.getHeartRateHistory(1, true);
+                var hrSample = hrHistory.next();
+                if (hrSample != null && hrSample.heartRate != ActivityMonitor.INVALID_HR_SAMPLE) {
+                    hr = hrSample.heartRate;
+                } else {
+                    hr = "--";
+                }
             }
 	        dc.drawText(width/5, height - height/5, Graphics.FONT_XTINY, hr,
 	                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
@@ -323,7 +373,6 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         var jdn = JDN(Time.now());
         var lon = EclipticLongitude(jdn);
         if (!northHemisphere) {
-            System.println("Reverse Solar Term for south hemisphere");
             lon = normalizeAngle(lon + 180);
         }
 
@@ -362,10 +411,22 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
 
     // The user has just looked at their watch. Timers and animations may be started here.
     function onExitSleep() {
+        System.println("[exit sleep]");
+        isAwake = true;
     }
 
     // Terminate any active timers and prepare for slow updates.
     function onEnterSleep() {
+        System.println("[enter sleep]");
+        isAwake = false;
     }
 
+}
+
+class elevenfortyfiveDelegate extends WatchUi.WatchFaceDelegate {
+    function onPowerBudgetExceeded(powerInfo) {
+        WatchFaceDelegate.onPowerBudgetExceeded(powerInfo);
+        System.println( "Average execution time: " + powerInfo.executionTimeAverage );
+        System.println( "Allowed execution time: " + powerInfo.executionTimeLimit );
+    }
 }

@@ -17,7 +17,11 @@ class elevenfortyfiveApp extends Application.AppBase {
 
     // Return the initial view of your application here
     function getInitialView() {
-        return [ new elevenfortyfiveView() ];
+        if (WatchUi has :WatchFaceDelegate) {
+            return [ new elevenfortyfiveView(), new elevenfortyfiveDelegate()];
+        } else {
+            return [ new elevenfortyfiveView()];
+        }
     }
 
     // New app settings have been received so trigger a UI update

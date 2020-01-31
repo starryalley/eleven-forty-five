@@ -34,5 +34,17 @@
     <setting propertyKey="@Properties.SouthHemisphere" title="@Strings.SouthHemisphereTitle">
         <settingConfig type="boolean" />
     </setting>
+    <setting propertyKey="@Properties.HourDigitYOffset" title="@Strings.HourDigitYOffsetTitle">
+        <settingConfig type="numeric" />
+    </setting>
+    <setting propertyKey="@Properties.MinuteDigitYOffset" title="@Strings.MinuteDigitYOffsetTitle">
+        <settingConfig type="numeric" />
+    </setting>
+    <setting propertyKey="@Properties.BottomInfoOffset" title="@Strings.BottomInfoOffsetTitle">
+        <settingConfig type="numeric" />
+    </setting>
+    <setting propertyKey="@Properties.BottomInfoSpaceOffset" title="@Strings.BottomInfoSpaceOffsetTitle">
+        <settingConfig type="numeric" />
+    </setting>
 
 </settings>
