@@ -8,6 +8,7 @@
     <property id="ShowBattery" type="boolean">false</property>
     <property id="ShowDaysToTerm" type="boolean">true</property>
     <property id="SouthHemisphere" type="boolean">false</property>
+    <property id="MarginOffset" type="number">0</property>
     <property id="HourDigitYOffset" type="number">0</property>
     <property id="MinuteDigitYOffset" type="number">0</property>
     <property id="BottomInfoOffset" type="number">0</property>

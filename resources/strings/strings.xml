@@ -9,6 +9,8 @@
     <string id="ShowBatteryTitle">Show Battery Percentage</string>
     <string id="ShowDaysToTermTitle">Show Days before/after Solar Term</string>
     <string id="SouthHemisphereTitle">Southern Hemisphere Solar Term</string>
+
+    <string id="MarginOffsetTitle">Margin Offset (pixels)</string>
     <string id="HourDigitYOffsetTitle">Hour Display Y Offset (pixels)</string>
     <string id="MinuteDigitYOffsetTitle">Minute Display Y Offset (pixels)</string>
     <string id="BottomInfoOffsetTitle">Bottom Text Y Offset (pixels)</string>

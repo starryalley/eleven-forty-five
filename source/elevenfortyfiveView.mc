@@ -16,12 +16,15 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     hidden var bitmap_nighthour;
     hidden var bitmap_minute;
     hidden var bitmap_term;
+    hidden var lastCalculatedTermTime = 0;
     hidden var text_term = "";
-    hidden var isAwake;
+    hidden var isAwake = true;
     hidden var lastUpdatedTs = 0;
     hidden var screenShape;
-    hidden var borderWidth = 15;
+    hidden var marginPixels = 15;
     hidden var partialUpdateAllowed = false;
+    hidden var lastHR = ActivityMonitor.INVALID_HR_SAMPLE;
+    hidden var lastHRTime = 0;
 
     function initialize() {
         WatchFace.initialize();
@@ -41,19 +44,19 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             smallSide = width;
         }
         if (smallSide < 200) {
-            borderWidth = 3;
+            marginPixels = 3;
         } else if (smallSide < 210) {
-            borderWidth = 10;
+            marginPixels = 10;
         } else if (smallSide < 270) {
-            borderWidth = 25;
+            marginPixels = 25;
         } else if (smallSide < 300) {
-            borderWidth = 35;
+            marginPixels = 35;
         } else {
-            borderWidth = 45;
+            marginPixels = 45;
         }
 
         System.println("screen width:" + width + ",height:" + height + ",shape:" + screenShape +
-            ",tiny text height:" + textHeight + ",borderWidth:" + borderWidth);
+            ",tiny text height:" + textHeight + ",marginPixels:" + marginPixels);
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -86,29 +89,30 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             }
         }
         */
+
+        var marginOffset = marginPixels + Application.getApp().getProperty("MarginOffset");
         northHemisphere = !Application.getApp().getProperty("SouthHemisphere");
 
         // Call the parent onUpdate function to redraw the layout
         View.onUpdate(dc);
 
         var clockTime = System.getClockTime();
-        //if (bitmap_hour == null || clockTime.min == 0) {
-        //System.println("Updating hour png");
         updateHourBitmap(clockTime.hour);
-        updateSolarTermAndDate();
-        //}
-
-        //if (bitmap_minute == null || clockTime.min % 15 == 0) {
-        //System.println("Updating minute png");
         updateMinuteBitmap(clockTime.min);
-	    //}
+
+        // calculate solar term every 1 hour
+        if (Time.now().value() - lastCalculatedTermTime > 3600) {
+            updateSolarTermAndDate();
+            lastCalculatedTermTime = Time.now().value();
+        }
 
         // alternative name on top
-        dc.drawBitmap(width/2-30, borderWidth, bitmap_althour);
-
-        // night name on top, below alternative name
-        if (bitmap_nighthour != null) {
-            dc.drawBitmap(width/2-30, borderWidth + 30, bitmap_nighthour);
+        if (isAwake) {
+	        dc.drawBitmap(width/2-30, marginOffset, bitmap_althour);
+	        // night name on top, below alternative name
+	        if (bitmap_nighthour != null) {
+	            dc.drawBitmap(width/2-30, marginOffset + 30, bitmap_nighthour);
+	        }
         }
 
         // modern hour/minute clock on the left
@@ -125,13 +129,13 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             hours = hours - 12;
         }
         dc.setColor(Application.getApp().getProperty("HourColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(borderWidth + semiXOffset, height/2-offset + Application.getApp().getProperty("HourDigitYOffset"), Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [hours]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(marginOffset + semiXOffset, height/2-offset + Application.getApp().getProperty("HourDigitYOffset"), Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [hours]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
         dc.setColor(Application.getApp().getProperty("MinuteColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(borderWidth + semiXOffset, height/2+offset + Application.getApp().getProperty("MinuteDigitYOffset"), Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(marginOffset + semiXOffset, height/2+offset + Application.getApp().getProperty("MinuteDigitYOffset"), Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
 
         // old Chinese clock hour on the right
-        dc.drawBitmap(width-borderWidth - 60 - semiXOffset, height/2-30, bitmap_hour);
-        dc.drawBitmap(width-borderWidth - 60 - semiXOffset, height/2, bitmap_minute);
+        dc.drawBitmap(width-marginOffset - 60 - semiXOffset, height/2-30, bitmap_hour);
+        dc.drawBitmap(width-marginOffset - 60 - semiXOffset, height/2, bitmap_minute);
 
         // show modern date on bottom, above solar term
         var spaceHeight = textHeight/5;
@@ -139,12 +143,12 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             spaceHeight = 0;
         }
         spaceHeight += Application.getApp().getProperty("BottomInfoSpaceOffset");
-        var startY = height - textHeight * 2 - spaceHeight - borderWidth/2 - 30 + Application.getApp().getProperty("BottomInfoOffset");
+        var startY = height - textHeight * 2 - spaceHeight - marginOffset/2 - 30 + Application.getApp().getProperty("BottomInfoOffset");
         if (screenShape == System.SCREEN_SHAPE_SEMI_ROUND) {
             startY -= (width-height);
         }
 
-        if (Application.getApp().getProperty("ShowDate")) {
+        if (isAwake && Application.getApp().getProperty("ShowDate")) {
 	        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
 	        var dateString = Lang.format(
 	            "$1$ $2$ $3$", [today.day_of_week, today.day, today.month]
@@ -152,44 +156,57 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             dc.drawText(width/2, startY, Graphics.FONT_XTINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // solar term on bottom
-        if (bitmap_term != null) {
+        if (isAwake && bitmap_term != null) {
             dc.drawBitmap(width/2-30, startY + textHeight + spaceHeight, bitmap_term);
         }
         // show xx days ago or in xx days
-        if (text_term.length() > 0 && Application.getApp().getProperty("ShowDaysToTerm")) {
+        if (isAwake && text_term.length() > 0 && Application.getApp().getProperty("ShowDaysToTerm")) {
             dc.drawText(width/2, startY + textHeight + spaceHeight * 2 + 30, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // show battery
-        if (Application.getApp().getProperty("ShowBattery")) {
+        if (isAwake && Application.getApp().getProperty("ShowBattery")) {
             dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
             dc.drawText(width - width/5, height - height/5, Graphics.FONT_XTINY, System.getSystemStats().battery.toNumber() + "%",
                 Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
         // show heart rate
-        //onPartialUpdate(dc);
+        if (isAwake && Application.getApp().getProperty("ShowHeartRate")) {
+            drawHeartRate(dc);
+        }
     }
 
     function onPartialUpdate(dc) {
-        if (Application.getApp().getProperty("ShowHeartRate")) {
-            if (Graphics.Dc has :setClip) {
-                dc.setClip(width/5 - textHeight/2, height - height/5 - textHeight/2, textHeight*2, textHeight);
-            }
-            dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
-            dc.clear();
-            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-            var hr = Activity.getActivityInfo().currentHeartRate;
-            if (hr == null) {
-                var hrHistory = ActivityMonitor.getHeartRateHistory(1, true);
-                var hrSample = hrHistory.next();
-                if (hrSample != null && hrSample.heartRate != ActivityMonitor.INVALID_HR_SAMPLE) {
-                    hr = hrSample.heartRate;
+        //System.println("onPartialUpdate");
+    }
+
+    function drawHeartRate(dc) {
+        if (Graphics.Dc has :setClip) {
+            dc.setClip(width/5 - textHeight/2, height - height/5 - textHeight/2, textHeight*2, textHeight);
+        }
+        dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
+        dc.clear();
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        var hr = Activity.getActivityInfo().currentHeartRate;
+        if (hr == null) {
+            var hrHistory = ActivityMonitor.getHeartRateHistory(1, true);
+            var hrSample = hrHistory.next();
+            if (hrSample != null && hrSample.heartRate != ActivityMonitor.INVALID_HR_SAMPLE) {
+                hr = hrSample.heartRate;
+                lastHR = hr;
+                lastHRTime = Time.now().value();
+            } else {
+                if (Time.now().value() - lastHRTime < 10) {
+                    hr = lastHR;
                 } else {
                     hr = "--";
                 }
             }
-	        dc.drawText(width/5, height - height/5, Graphics.FONT_XTINY, hr,
-	                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        } else {
+            lastHR = hr;
+            lastHRTime = Time.now().value();
         }
+        dc.drawText(width/5, height - height/5, Graphics.FONT_XTINY, hr,
+                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
 
 	function GetSolarTermResource(lon) {
