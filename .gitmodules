@@ -1,0 +1,3 @@
+[submodule "chinese_fonts/garmin-tilemapper"]
+	path = chinese_fonts/garmin-tilemapper
+	url = git@github.com:starryalley/garmin-tilemapper.git
