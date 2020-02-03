@@ -23,7 +23,7 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     hidden var screenShape;
     hidden var marginPixels = 15;
     hidden var partialUpdateAllowed = false;
-    hidden var lastHR = ActivityMonitor.INVALID_HR_SAMPLE;
+    hidden var lastHR = 0;
     hidden var lastHRTime = 0;
 
     function initialize() {
@@ -182,12 +182,12 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     function drawHeartRate(dc) {
         if (Graphics.Dc has :setClip) {
             dc.setClip(width/5 - textHeight/2, height - height/5 - textHeight/2, textHeight*2, textHeight);
+            dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
+            dc.clear();
         }
-        dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
-        dc.clear();
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         var hr = Activity.getActivityInfo().currentHeartRate;
-        if (hr == null) {
+        if (hr == null && ActivityMonitor has :getHeartRateHistory) {
             var hrHistory = ActivityMonitor.getHeartRateHistory(1, true);
             var hrSample = hrHistory.next();
             if (hrSample != null && hrSample.heartRate != ActivityMonitor.INVALID_HR_SAMPLE) {
@@ -205,8 +205,10 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             lastHR = hr;
             lastHRTime = Time.now().value();
         }
-        dc.drawText(width/5, height - height/5, Graphics.FONT_XTINY, hr,
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        if (lastHR != null) {
+	        dc.drawText(width/5, height - height/5, Graphics.FONT_XTINY, hr,
+	                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        }
     }
 
 	function GetSolarTermResource(lon) {
