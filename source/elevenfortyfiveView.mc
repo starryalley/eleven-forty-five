@@ -11,11 +11,8 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     hidden var height;
     hidden var textHeight;
     hidden var northHemisphere = true;
-    hidden var bitmap_hour;
-    hidden var bitmap_althour;
-    hidden var bitmap_nighthour;
-    hidden var bitmap_minute;
-    hidden var bitmap_term;
+    hidden var lastNorthHemisphere = true;
+    hidden var currentTermName = "";
     hidden var lastCalculatedTermTime = 0;
     hidden var text_term = "";
     hidden var isAwake = true;
@@ -25,6 +22,115 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     hidden var partialUpdateAllowed = false;
     hidden var lastHR = 0;
     hidden var lastHRTime = 0;
+
+    // for Chinese font
+    hidden var font;
+    hidden var fontData;
+    hidden var fontWidth;
+
+    const chToIndexMap = {
+        "初" => 0, "正" => 1, "子" => 2, "丑" => 3, "寅" => 4,
+        "卯" => 5, "辰" => 6, "巳" => 7, "午" => 8, "未" => 9,
+        "申" => 10, "酉" => 11, "戌" => 12, "亥" => 13, "雞" => 14,
+        "鳴" => 15, "平" => 16, "旦" => 17, "日" => 18, "出" => 19,
+        "食" => 20, "時" => 21, "隅" => 22, "中" => 23, "昳" => 24,
+        "哺" => 25, "入" => 26, "黃" => 27, "昏" => 28, "人" => 29,
+        "定" => 30, "夜" => 31, "半" => 32, "更" => 33, "一" => 34,
+        "二" => 35, "三" => 36, "四" => 37, "五" => 38, "刻" => 39,
+        "立" => 40, "春" => 41, "雨" => 42, "水" => 43, "驚" => 44,
+        "蟄" => 45, "分" => 46, "清" => 47, "明" => 48, "穀" => 49,
+        "夏" => 50, "小" => 51, "滿" => 52, "芒" => 53, "種" => 54,
+        "至" => 55, "暑" => 56, "大" => 57, "秋" => 58, "處" => 59,
+        "白" => 60, "露" => 61, "寒" => 62, "霜" => 63, "降" => 64,
+        "冬" => 65, "雪" => 66,
+    };
+
+    const hourNameMap = {
+        23 => "子初", 0 => "子正",
+        1 => "丑初", 2 => "丑正",
+        3 => "寅初", 4 => "寅正",
+        5 => "卯初", 6 => "卯正",
+        7 => "辰初", 8 => "辰正",
+        9 => "巳初", 10 => "巳正",
+        11 => "午初", 12 => "午正",
+        13 => "未初", 14 => "未正",
+        15 => "申初", 16 => "申正",
+        17 => "酉初", 18 => "酉正",
+        19 => "戌初", 20 => "戌正",
+        21 => "亥初", 22 => "亥正",
+    };
+
+    const nightHourNameMap = {
+        19 => "一更", 20 => "一更",
+        21 => "二更", 22 => "二更",
+        23 => "三更", 0 => "三更",
+        1 => "四更", 2 => "四更",
+        3 => "五更", 4 => "五更",
+    };
+
+    const altHourNameMap = {
+        23 => "夜半", 0 => "夜半",
+        1 => "雞鳴", 2 => "雞鳴",
+        3 => "平旦", 4 => "平旦",
+        5 => "日出", 6 => "日出",
+        7 => "食時", 8 => "食時",
+        9 => "隅中", 10 => "隅中",
+        11 => "日中", 12 => "日中",
+        13 => "日昳", 14 => "日昳",
+        15 => "哺時", 16 => "哺時",
+        17 => "日入", 18 => "日入",
+        19 => "黃昏", 20 => "黃昏",
+        21 => "人定", 22 => "人定",
+    };
+
+    const termNameMap = {
+        0 => "春分", 15 => "清明",
+        30 => "穀雨", 45 => "立夏",
+        60 => "小滿", 75 => "芒種",
+        90 => "夏至", 105 => "小暑",
+        120 => "大暑", 135 => "立秋",
+        150 => "處暑", 165 => "白露",
+        180 => "秋分", 195 => "寒露",
+        210 => "霜降", 225 => "立冬",
+        240 => "小雪", 255 => "大雪",
+        270 => "冬至", 285 => "小寒",
+        300 => "大寒", 315 => "立春",
+        330 => "雨水", 345 => "驚蟄",
+    };
+
+    function drawChineseTextHorizontal(dc, text, color, x, y, justification) {
+        if (text.length() == 0) {
+            return;
+        }
+        // modify x according to justification
+        var pixels = text.length() * fontWidth;
+        switch(justification) {
+        case Graphics.TEXT_JUSTIFY_CENTER:
+            x = dc.getWidth() / 2 - pixels/2;
+            break;
+        case Graphics.TEXT_JUSTIFY_RIGHT:
+            x = dc.getWidth() - pixels - x;
+            break;
+        }
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        for (var i = 0; i < text.length(); i++) {
+            var ch = text.substring(i, i+1);
+            if (chToIndexMap.hasKey(ch)) {
+                drawTiles(dc, fontData[chToIndexMap.get(ch)], font, x + i*fontWidth, y);
+            }
+        }
+    }
+
+    // copied from https://github.com/sunpazed/garmin-tilemapper
+    function drawTiles(dc, data, font, xoff, yoff) {
+        for(var i = 0; i < data.size(); i++) {
+            var packed_value = data[i];
+            var char = (packed_value&0x00000FFF);
+            var xpos = (packed_value&0x003FF000)>>12;
+            var ypos = (packed_value&0xFFC00000)>>22;
+            dc.drawText(xoff + xpos, yoff + ypos, font, (char.toNumber()).toChar(), Graphics.TEXT_JUSTIFY_LEFT);
+        }
+    }
 
     function initialize() {
         WatchFace.initialize();
@@ -39,29 +145,15 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         height = dc.getHeight();
         textHeight = dc.getFontHeight(Graphics.Graphics.FONT_XTINY);
         screenShape = System.getDeviceSettings().screenShape;
-        var smallSide = height;
-        if (width < height) {
-            smallSide = width;
-        }
-        if (smallSide < 200) {
-            marginPixels = 3;
-        } else if (smallSide < 210) {
-            marginPixels = 10;
-        } else if (smallSide < 270) {
-            marginPixels = 25;
-        } else if (smallSide < 300) {
-            marginPixels = 35;
-        } else {
-            marginPixels = 45;
-        }
+        font = WatchUi.loadResource(Rez.Fonts.font_ch);
+        fontData = WatchUi.loadResource(Rez.JsonData.fontData);
+        fontWidth = dc.getFontHeight(font);
+        marginPixels = fontWidth/3;
 
         System.println("screen width:" + width + ",height:" + height + ",shape:" + screenShape +
-            ",tiny text height:" + textHeight + ",marginPixels:" + marginPixels);
+            ",tiny text height:" + textHeight + ",marginPixels:" + marginPixels + ",font size:" + fontWidth);
     }
 
-    // Called when this View is brought to the foreground. Restore
-    // the state of this View and prepare it to be shown. This includes
-    // loading resources into memory.
     function onShow() {
     }
 
@@ -92,27 +184,33 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
 
         var marginOffset = marginPixels + Application.getApp().getProperty("MarginOffset");
         northHemisphere = !Application.getApp().getProperty("SouthHemisphere");
+        var hemisphereChanged = false;
+        if (lastNorthHemisphere != northHemisphere) {
+            lastNorthHemisphere = northHemisphere;
+            hemisphereChanged = true;
+        }
 
         // Call the parent onUpdate function to redraw the layout
         View.onUpdate(dc);
 
         var clockTime = System.getClockTime();
-        updateHourBitmap(clockTime.hour);
-        updateMinuteBitmap(clockTime.min);
+        var hours = clockTime.hour;
 
         // calculate solar term every 1 hour
-        if (Time.now().value() - lastCalculatedTermTime > 3600) {
+        if (Time.now().value() - lastCalculatedTermTime > 3600 || hemisphereChanged) {
             updateSolarTermAndDate();
             lastCalculatedTermTime = Time.now().value();
         }
 
         // alternative name on top
         if (isAwake) {
-	        dc.drawBitmap(width/2-30, marginOffset, bitmap_althour);
-	        // night name on top, below alternative name
-	        if (bitmap_nighthour != null) {
-	            dc.drawBitmap(width/2-30, marginOffset + 30, bitmap_nighthour);
-	        }
+            drawChineseTextHorizontal(dc, altHourNameMap[hours], Application.getApp().getProperty("AltHourColor"),
+                width/2, marginOffset, Graphics.TEXT_JUSTIFY_CENTER);
+            // night name on top, below alternative name
+            if (nightHourNameMap.hasKey(hours)) {
+                drawChineseTextHorizontal(dc, nightHourNameMap[hours], Application.getApp().getProperty("NightHourColor"),
+                    width/2, marginOffset + fontWidth, Graphics.TEXT_JUSTIFY_CENTER);
+            }
         }
 
         // modern hour/minute clock on the left
@@ -120,22 +218,23 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         if (screenShape == System.SCREEN_SHAPE_SEMI_ROUND) {
             semiXOffset = 5;
         }
-        var offset = dc.getFontHeight(Graphics.FONT_NUMBER_MEDIUM)/3;
-        if (height <= 200) {
-            offset += 5;
-        }
-        var hours = clockTime.hour;
+        var offset = dc.getFontHeight(Graphics.FONT_NUMBER_MEDIUM);
+
         if (!System.getDeviceSettings().is24Hour && hours > 12) {
             hours = hours - 12;
         }
         dc.setColor(Application.getApp().getProperty("HourColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(marginOffset + semiXOffset, height/2-offset + Application.getApp().getProperty("HourDigitYOffset"), Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [hours]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(marginOffset + semiXOffset, height/2-offset - Application.getApp().getProperty("TimeDigitYOffset"),
+            Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [hours]), Graphics.TEXT_JUSTIFY_LEFT);
         dc.setColor(Application.getApp().getProperty("MinuteColor"), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(marginOffset + semiXOffset, height/2+offset + Application.getApp().getProperty("MinuteDigitYOffset"), Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_VCENTER | Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(marginOffset + semiXOffset, height/2 + Application.getApp().getProperty("TimeDigitYOffset"),
+            Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_LEFT);
 
         // old Chinese clock hour on the right
-        dc.drawBitmap(width-marginOffset - 60 - semiXOffset, height/2-30, bitmap_hour);
-        dc.drawBitmap(width-marginOffset - 60 - semiXOffset, height/2, bitmap_minute);
+        drawChineseTextHorizontal(dc, hourNameMap[clockTime.hour], Application.getApp().getProperty("HourColor"),
+            width-marginOffset - fontWidth * 2 - semiXOffset, height/2-fontWidth, Graphics.TEXT_JUSTIFY_LEFT);
+        drawChineseTextHorizontal(dc, getMinuteInChinese(clockTime.min), Application.getApp().getProperty("MinuteColor"),
+            width-marginOffset - fontWidth * 2 - semiXOffset, height/2, Graphics.TEXT_JUSTIFY_LEFT);
 
         // show modern date on bottom, above solar term
         var spaceHeight = textHeight/5;
@@ -143,29 +242,32 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             spaceHeight = 0;
         }
         spaceHeight += Application.getApp().getProperty("BottomInfoSpaceOffset");
-        var startY = height - textHeight * 2 - spaceHeight - marginOffset/2 - 30 + Application.getApp().getProperty("BottomInfoOffset");
+        var startY = height - textHeight * 2 - spaceHeight - marginOffset/2 - fontWidth + Application.getApp().getProperty("BottomInfoOffset");
         if (screenShape == System.SCREEN_SHAPE_SEMI_ROUND) {
             startY -= (width-height);
         }
 
         if (isAwake && Application.getApp().getProperty("ShowDate")) {
-	        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-	        var dateString = Lang.format(
-	            "$1$ $2$ $3$", [today.day_of_week, today.day, today.month]
-	        );
+            var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+            var dateString = Lang.format(
+                "$1$ $2$ $3$", [today.day_of_week, today.day, today.month]
+            );
+            dc.setColor(Application.getApp().getProperty("DateColor"), Graphics.COLOR_TRANSPARENT);
             dc.drawText(width/2, startY, Graphics.FONT_XTINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // solar term on bottom
-        if (isAwake && bitmap_term != null) {
-            dc.drawBitmap(width/2-30, startY + textHeight + spaceHeight, bitmap_term);
+        if (isAwake) {
+            drawChineseTextHorizontal(dc, currentTermName, Application.getApp().getProperty("SolarTermColor"),
+                width/2, startY + textHeight + spaceHeight, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // show xx days ago or in xx days
         if (isAwake && text_term.length() > 0 && Application.getApp().getProperty("ShowDaysToTerm")) {
-            dc.drawText(width/2, startY + textHeight + spaceHeight * 2 + 30, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.setColor(Application.getApp().getProperty("SolarTermNoteColor"), Graphics.COLOR_TRANSPARENT);
+            dc.drawText(width/2, startY + textHeight + spaceHeight * 2 + fontWidth, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // show battery
         if (isAwake && Application.getApp().getProperty("ShowBattery")) {
-            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(Application.getApp().getProperty("BatteryColor"), Graphics.COLOR_TRANSPARENT);
             dc.drawText(width - width/5, height - height/5, Graphics.FONT_XTINY, System.getSystemStats().battery.toNumber() + "%",
                 Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
@@ -182,10 +284,10 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
     function drawHeartRate(dc) {
         if (Graphics.Dc has :setClip) {
             dc.setClip(width/5 - textHeight/2, height - height/5 - textHeight/2, textHeight*2, textHeight);
-            dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
+            dc.setColor(Graphics.COLOR_TRANSPARENT, Application.getApp().getProperty("BackgroundColor"));
             dc.clear();
         }
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(Application.getApp().getProperty("HRColor"), Graphics.COLOR_TRANSPARENT);
         var hr = Activity.getActivityInfo().currentHeartRate;
         if (hr == null && ActivityMonitor has :getHeartRateHistory) {
             var hrHistory = ActivityMonitor.getHeartRateHistory(1, true);
@@ -206,185 +308,20 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             lastHRTime = Time.now().value();
         }
         if (lastHR != null) {
-	        dc.drawText(width/5, height - height/5, Graphics.FONT_XTINY, hr,
-	                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+            dc.drawText(width/5, height - height/5, Graphics.FONT_XTINY, hr,
+                    Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
     }
 
-	function GetSolarTermResource(lon) {
-	    switch (lon) {
-	    case 0:
-	        return Rez.Drawables.solarterm_0;
-	    case 15:
-	        return Rez.Drawables.solarterm_15;
-	    case 30:
-	        return Rez.Drawables.solarterm_30;
-	    case 45:
-	        return Rez.Drawables.solarterm_45;
-	    case 60:
-	        return Rez.Drawables.solarterm_60;
-	    case 75:
-	        return Rez.Drawables.solarterm_75;
-	    case 90:
-	        return Rez.Drawables.solarterm_90;
-	    case 105:
-	        return Rez.Drawables.solarterm_105;
-	    case 120:
-	        return Rez.Drawables.solarterm_120;
-	    case 135:
-	        return Rez.Drawables.solarterm_135;
-	    case 150:
-	        return Rez.Drawables.solarterm_150;
-	    case 165:
-	        return Rez.Drawables.solarterm_165;
-	    case 180:
-	        return Rez.Drawables.solarterm_180;
-	    case 195:
-	        return Rez.Drawables.solarterm_195;
-	    case 210:
-	        return Rez.Drawables.solarterm_210;
-	    case 225:
-	        return Rez.Drawables.solarterm_225;
-	    case 240:
-	        return Rez.Drawables.solarterm_240;
-	    case 255:
-	        return Rez.Drawables.solarterm_255;
-	    case 270:
-	        return Rez.Drawables.solarterm_270;
-	    case 285:
-	        return Rez.Drawables.solarterm_285;
-	    case 300:
-	        return Rez.Drawables.solarterm_300;
-	    case 315:
-	        return Rez.Drawables.solarterm_315;
-	    case 330:
-	        return Rez.Drawables.solarterm_330;
-	    case 345:
-	        return Rez.Drawables.solarterm_345;
-	    }
-	}
-
-    function updateHourBitmap(hour) {
-        bitmap_nighthour = null;
-        switch (hour) {
-            case 0:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_00);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_23);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_23);
-                break;
-            case 1:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_01);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_01);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_01);
-                break;
-            case 2:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_02);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_01);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_01);
-                break;
-            case 3:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_03);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_03);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_03);
-                break;
-            case 4:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_04);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_03);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_03);
-                break;
-            case 5:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_05);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_05);
-                break;
-            case 6:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_06);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_05);
-                break;
-            case 7:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_07);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_07);
-                break;
-            case 8:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_08);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_07);
-                break;
-            case 9:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_09);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_09);
-                break;
-            case 10:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_10);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_09);
-                break;
-            case 11:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_11);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_11);
-                break;
-            case 12:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_12);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_11);
-                break;
-            case 13:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_13);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_13);
-                break;
-            case 14:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_14);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_13);
-                break;
-            case 15:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_15);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_15);
-                break;
-            case 16:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_16);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_15);
-                break;
-            case 17:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_17);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_17);
-                break;
-            case 18:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_18);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_17);
-                break;
-            case 19:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_19);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_19);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_19);
-                break;
-            case 20:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_20);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_19);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_19);
-                break;
-            case 21:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_21);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_21);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_21);
-                break;
-            case 22:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_22);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_21);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_21);
-                break;
-            case 23:
-                bitmap_hour = WatchUi.loadResource(Rez.Drawables.hour_23);
-                bitmap_althour = WatchUi.loadResource(Rez.Drawables.hour_alt_23);
-                bitmap_nighthour = WatchUi.loadResource(Rez.Drawables.hour_night_23);
-                break;
-        }
-    }
-
-    function updateMinuteBitmap(minutes) {
+    function getMinuteInChinese(minutes) {
         if (minutes < 15) {
-            bitmap_minute = WatchUi.loadResource(Rez.Drawables.minute_15);
+            return "一刻";
         } else if (minutes < 30) {
-            bitmap_minute = WatchUi.loadResource(Rez.Drawables.minute_30);
+            return "二刻";
         } else if (minutes < 45) {
-            bitmap_minute = WatchUi.loadResource(Rez.Drawables.minute_45);
+            return "三刻";
         } else {
-            bitmap_minute = WatchUi.loadResource(Rez.Drawables.minute_60);
+            return "四刻";
         }
     }
 
@@ -415,17 +352,13 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         } else {
             text_term = "";
         }
-        bitmap_term = WatchUi.loadResource(GetSolarTermResource(term[0]));
+        currentTermName = termNameMap[term[0]];
     }
 
     // Called when this View is removed from the screen. Save the
     // state of this View here. This includes freeing resources from
     // memory.
     function onHide() {
-        bitmap_hour = null;
-        bitmap_althour = null;
-        bitmap_nighthour = null;
-        bitmap_minute = null;
     }
 
     // The user has just looked at their watch. Timers and animations may be started here.

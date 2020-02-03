@@ -1,16 +1,23 @@
 <properties>
 
     <property id="BackgroundColor" type="number">0x000000</property>
-    <property id="HourColor" type="number">0x808080</property>
-    <property id="MinuteColor" type="number">0xEEEEEE</property>
+    <property id="AltHourColor" type="number">0xAAAAAA</property>
+    <property id="NightHourColor" type="number">0x555555</property>
+    <property id="HourColor" type="number">0xAAAAAA</property>
+    <property id="MinuteColor" type="number">0xFFFFFF</property>
+    <property id="SolarTermColor" type="number">0xFFFFFF</property>
+    <property id="DateColor" type="number">0xAAAAAA</property>
+    <property id="SolarTermNoteColor" type="number">0x555555</property>
+    <property id="BatteryColor" type="number">0xAAAAAA</property>
+    <property id="HRColor" type="number">0xAA0000</property>
+
     <property id="ShowDate" type="boolean">true</property>
     <property id="ShowHeartRate" type="boolean">false</property>
     <property id="ShowBattery" type="boolean">false</property>
     <property id="ShowDaysToTerm" type="boolean">true</property>
     <property id="SouthHemisphere" type="boolean">false</property>
     <property id="MarginOffset" type="number">0</property>
-    <property id="HourDigitYOffset" type="number">0</property>
-    <property id="MinuteDigitYOffset" type="number">0</property>
+    <property id="TimeDigitYOffset" type="number">0</property>
     <property id="BottomInfoOffset" type="number">0</property>
     <property id="BottomInfoSpaceOffset" type="number">0</property>
 
