@@ -1,6 +1,6 @@
 # Eleven Forty-Five
 
-![Screenshots](screenshots/screenshot.png)
+![Screenshots](screenshots/screenshot_2.x_1.png)
 
 
 Eleven Forty-Five (11:45，午時三刻) is a [Garmin Connect IQ](https://apps.garmin.com/en-US/) watchface , which displays current time and date along with [traditional Chinese timekeeping](https://en.wikipedia.org/wiki/Traditional_Chinese_timekeeping) notation and Chinese [Solar Term](https://en.wikipedia.org/wiki/Solar_term). Note that the solar term will be inverted in southern hemisphere should user choose to show southern hemisphere solar term.
