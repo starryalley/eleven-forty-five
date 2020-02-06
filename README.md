@@ -11,9 +11,11 @@ Eleven Forty-Five (11:45，午時三刻) is a [Garmin Connect IQ](https://apps.g
 
 ## Download
 
-2.x+ version for CIQ 2.x+: [View on Garmin Connect IQ Store](https://apps.garmin.com/en-US/apps/9aa072a7-7154-44ae-8069-ae8bf1e4e7e9)
+[<img src="https://developer.garmin.com/img/connect-iq/brand/available-badge.svg"
+      alt="Available on Garmin Connect IQ"
+      height="90">](https://apps.garmin.com/en-US/apps/9aa072a7-7154-44ae-8069-ae8bf1e4e7e9)
 
-1.x version for CIQ 1.x+: [View on Garmin Connect IQ Store](https://apps.garmin.com/en-US/apps/e8b18a43-2f35-4cc7-a403-f0a871115d93)
+For CIQ 1.x devices, use [this version on Garmin Connect IQ Store](https://apps.garmin.com/en-US/apps/e8b18a43-2f35-4cc7-a403-f0a871115d93)
 
 
 The watchface consists of just time and date (in modern clock and date in English) along with Chinese time and solar term.
