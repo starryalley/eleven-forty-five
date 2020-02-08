@@ -159,28 +159,14 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
 
     // Update the view
     function onUpdate(dc) {
+        var showExtraInfo = true;
+        if (Application.getApp().getProperty("LessInfoOnGesture") && !isAwake) {
+            showExtraInfo = false;
+        }
         // this is necessary as some watch may still be using the clip rectangle set in onPartialUpdate()
         if (Graphics.Dc has :setClip) {
             dc.setClip(0, 0, width, height);
         }
-        // not using last GPS position which isn't quite reliable
-        /*
-        // update hemisphere if we have last activity's location
-        var locAccuracy = Activity.getActivityInfo().currentLocationAccuracy;
-        if (locAccuracy == Position.QUALITY_LAST_KNOWN ||
-                locAccuracy == Position.QUALITY_GOOD) {
-            var curLoc = Activity.getActivityInfo().currentLocation;
-            if (curLoc != null) {
-                var lat= curLoc.toDegrees()[0].toFloat();
-                System.println("Current Latitude:" + lat);
-                if (lat < 0) {
-                    northHemisphere = false;
-                } else {
-                    northHemisphere = true;
-                }
-            }
-        }
-        */
 
         var marginOffset = marginPixels + Application.getApp().getProperty("MarginOffset");
         northHemisphere = !Application.getApp().getProperty("SouthHemisphere");
@@ -203,7 +189,7 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         }
 
         // alternative name on top
-        if (isAwake) {
+        if (showExtraInfo) {
             drawChineseTextHorizontal(dc, altHourNameMap[hours], Application.getApp().getProperty("AltHourColor"),
                 width/2, marginOffset, Graphics.TEXT_JUSTIFY_CENTER);
             // night name on top, below alternative name
@@ -247,7 +233,7 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             startY -= (width-height);
         }
 
-        if (isAwake && Application.getApp().getProperty("ShowDate")) {
+        if (showExtraInfo && Application.getApp().getProperty("ShowDate")) {
             var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
             var dateString = Lang.format(
                 "$1$ $2$ $3$", [today.day_of_week, today.day, today.month]
@@ -256,23 +242,23 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             dc.drawText(width/2, startY, Graphics.FONT_XTINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // solar term on bottom
-        if (isAwake) {
+        if (showExtraInfo) {
             drawChineseTextHorizontal(dc, currentTermName, Application.getApp().getProperty("SolarTermColor"),
                 width/2, startY + textHeight + spaceHeight, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // show xx days ago or in xx days
-        if (isAwake && text_term.length() > 0 && Application.getApp().getProperty("ShowDaysToTerm")) {
+        if (showExtraInfo && text_term.length() > 0 && Application.getApp().getProperty("ShowDaysToTerm")) {
             dc.setColor(Application.getApp().getProperty("SolarTermNoteColor"), Graphics.COLOR_TRANSPARENT);
             dc.drawText(width/2, startY + textHeight + spaceHeight * 2 + fontWidth, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // show battery
-        if (isAwake && Application.getApp().getProperty("ShowBattery")) {
+        if (showExtraInfo && Application.getApp().getProperty("ShowBattery")) {
             dc.setColor(Application.getApp().getProperty("BatteryColor"), Graphics.COLOR_TRANSPARENT);
             dc.drawText(width - width/5, height - height/5, Graphics.FONT_XTINY, System.getSystemStats().battery.toNumber() + "%",
                 Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
         // show heart rate
-        if (isAwake && Application.getApp().getProperty("ShowHeartRate")) {
+        if (showExtraInfo && Application.getApp().getProperty("ShowHeartRate")) {
             drawHeartRate(dc);
         }
     }

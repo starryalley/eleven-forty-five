@@ -1,5 +1,7 @@
 <strings>
-    <string id="AppName">Eleven Forty-Five (Anti-alias)</string>
+    <string id="AppName">Eleven Forty-Five (Anti-aliasing)</string>
+
+    <string id="LessInfoOnGestureTitle">Show Less Info in Standby</string>
 
     <string id="BackgroundColorTitle">Background Color</string>
     <string id="AltHourColorTitle">Alternative Hour Name Color</string>

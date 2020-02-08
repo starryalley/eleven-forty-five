@@ -1,4 +1,5 @@
 <properties>
+    <property id="LessInfoOnGesture" type="boolean">false</property>
 
     <property id="BackgroundColor" type="number">0x000000</property>
     <property id="AltHourColor" type="number">0xAAAAAA</property>

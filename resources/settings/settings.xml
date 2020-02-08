@@ -1,4 +1,7 @@
 <settings>
+    <setting propertyKey="@Properties.LessInfoOnGesture" title="@Strings.LessInfoOnGestureTitle">
+        <settingConfig type="boolean" />
+    </setting>
 
     <setting propertyKey="@Properties.ShowDate" title="@Strings.ShowDateTitle">
         <settingConfig type="boolean" />
