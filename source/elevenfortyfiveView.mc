@@ -151,14 +151,13 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         marginPixels = fontWidth/3;
 
         System.println("screen width:" + width + ",height:" + height + ",shape:" + screenShape +
-            ",tiny text height:" + textHeight + ",marginPixels:" + marginPixels + ",font size:" + fontWidth);
-    }
-
-    function onShow() {
+            ",text height:" + textHeight + ",marginPixels:" + marginPixels + ",font size:" + fontWidth);
     }
 
     // Update the view
     function onUpdate(dc) {
+        // update text Height
+        textHeight = dc.getFontHeight(Application.getApp().getProperty("fontSize"));
         var showExtraInfo = true;
         if (Application.getApp().getProperty("LessInfoOnGesture") && !isAwake) {
             showExtraInfo = false;
