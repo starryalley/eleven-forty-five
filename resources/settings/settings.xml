@@ -19,6 +19,22 @@
         <settingConfig type="boolean" />
     </setting>
 
+    <setting propertyKey="@Properties.fontSize" title="@Strings.fontSizeTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.FontSmall</listEntry>
+            <listEntry value="1">@Strings.FontMedium</listEntry>
+            <listEntry value="2">@Strings.FontLarge</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.numberFontSize" title="@Strings.numberFontSizeTitle">
+        <settingConfig type="list">
+            <listEntry value="5">@Strings.FontSmall</listEntry>
+            <listEntry value="6">@Strings.FontMedium</listEntry>
+            <listEntry value="7">@Strings.FontLarge</listEntry>
+        </settingConfig>
+    </setting>
+
     <setting propertyKey="@Properties.BackgroundColor" title="@Strings.BackgroundColorTitle">
         <settingConfig type="list">
             <listEntry value="0x000000">@Strings.ColorBlack</listEntry>

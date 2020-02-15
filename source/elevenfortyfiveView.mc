@@ -143,7 +143,7 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         setLayout(Rez.Layouts.WatchFace(dc));
         width = dc.getWidth();
         height = dc.getHeight();
-        textHeight = dc.getFontHeight(Graphics.Graphics.FONT_XTINY);
+        textHeight = dc.getFontHeight(Application.getApp().getProperty("fontSize"));
         screenShape = System.getDeviceSettings().screenShape;
         font = WatchUi.loadResource(Rez.Fonts.font_ch);
         fontData = WatchUi.loadResource(Rez.JsonData.fontData);
@@ -204,17 +204,17 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         if (screenShape == System.SCREEN_SHAPE_SEMI_ROUND) {
             semiXOffset = 5;
         }
-        var offset = dc.getFontHeight(Graphics.FONT_NUMBER_MEDIUM);
+        var offset = dc.getFontHeight(Application.getApp().getProperty("numberFontSize"));
 
         if (!System.getDeviceSettings().is24Hour && hours > 12) {
             hours = hours - 12;
         }
         dc.setColor(Application.getApp().getProperty("HourColor"), Graphics.COLOR_TRANSPARENT);
         dc.drawText(marginOffset + semiXOffset, height/2-offset - Application.getApp().getProperty("TimeDigitYOffset"),
-            Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [hours]), Graphics.TEXT_JUSTIFY_LEFT);
+            Application.getApp().getProperty("numberFontSize"), Lang.format("$1$", [hours]), Graphics.TEXT_JUSTIFY_LEFT);
         dc.setColor(Application.getApp().getProperty("MinuteColor"), Graphics.COLOR_TRANSPARENT);
         dc.drawText(marginOffset + semiXOffset, height/2 + Application.getApp().getProperty("TimeDigitYOffset"),
-            Graphics.FONT_NUMBER_MEDIUM, Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_LEFT);
+            Application.getApp().getProperty("numberFontSize"), Lang.format("$1$", [clockTime.min.format("%02d")]), Graphics.TEXT_JUSTIFY_LEFT);
 
         // old Chinese clock hour on the right
         drawChineseTextHorizontal(dc, hourNameMap[clockTime.hour], Application.getApp().getProperty("HourColor"),
@@ -239,7 +239,7 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
                 "$1$ $2$ $3$", [today.day_of_week, today.day, today.month]
             );
             dc.setColor(Application.getApp().getProperty("DateColor"), Graphics.COLOR_TRANSPARENT);
-            dc.drawText(width/2, startY, Graphics.FONT_XTINY, dateString, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(width/2, startY, Application.getApp().getProperty("fontSize"), dateString, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // solar term on bottom
         if (showExtraInfo) {
@@ -249,12 +249,12 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         // show xx days ago or in xx days
         if (showExtraInfo && text_term.length() > 0 && Application.getApp().getProperty("ShowDaysToTerm")) {
             dc.setColor(Application.getApp().getProperty("SolarTermNoteColor"), Graphics.COLOR_TRANSPARENT);
-            dc.drawText(width/2, startY + textHeight + spaceHeight * 2 + fontWidth, Graphics.FONT_XTINY, text_term, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(width/2, startY + textHeight + spaceHeight * 2 + fontWidth, Application.getApp().getProperty("fontSize"), text_term, Graphics.TEXT_JUSTIFY_CENTER);
         }
         // show battery
         if (showExtraInfo && Application.getApp().getProperty("ShowBattery")) {
             dc.setColor(Application.getApp().getProperty("BatteryColor"), Graphics.COLOR_TRANSPARENT);
-            dc.drawText(width - width/5, height - height/5, Graphics.FONT_XTINY, System.getSystemStats().battery.toNumber() + "%",
+            dc.drawText(width - width/5, height - height/5, Application.getApp().getProperty("fontSize"), System.getSystemStats().battery.toNumber() + "%",
                 Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
         // show heart rate
@@ -294,7 +294,7 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
             lastHRTime = Time.now().value();
         }
         if (lastHR != null) {
-            dc.drawText(width/5, height - height/5, Graphics.FONT_XTINY, hr,
+            dc.drawText(width/5, height - height/5, Application.getApp().getProperty("fontSize"), hr,
                     Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
     }
@@ -358,13 +358,15 @@ class elevenfortyfiveView extends WatchUi.WatchFace {
         System.println("[enter sleep]");
         isAwake = false;
     }
-
 }
 
 class elevenfortyfiveDelegate extends WatchUi.WatchFaceDelegate {
+    function initialize() {
+        WatchFaceDelegate.initialize();
+    }
     function onPowerBudgetExceeded(powerInfo) {
         WatchFaceDelegate.onPowerBudgetExceeded(powerInfo);
-        System.println( "Average execution time: " + powerInfo.executionTimeAverage );
-        System.println( "Allowed execution time: " + powerInfo.executionTimeLimit );
+        System.println("Average execution time: " + powerInfo.executionTimeAverage);
+        System.println("Allowed execution time: " + powerInfo.executionTimeLimit);
     }
 }

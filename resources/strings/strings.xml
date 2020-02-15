@@ -15,7 +15,7 @@
     <string id="HRColorTitle">Heart Rate Color</string>
 
     <string id="ShowDateTitle">Show Date</string>
-    <string id="ShowHeartRateTitle">Show Heart Rate (experimental)</string>
+    <string id="ShowHeartRateTitle">Show Heart Rate</string>
     <string id="ShowBatteryTitle">Show Battery Percentage</string>
     <string id="ShowDaysToTermTitle">Show Days before/after Solar Term</string>
     <string id="SouthHemisphereTitle">Southern Hemisphere Solar Term</string>
@@ -24,6 +24,13 @@
     <string id="TimeDigitYOffsetTitle">Time Digit Display Spacing Offset (pixels)</string>
     <string id="BottomInfoOffsetTitle">Bottom Text Position Y Offset (pixels)</string>
     <string id="BottomInfoSpaceOffsetTitle">Bottom Text Spacing Offset (pixels)</string>
+
+    <string id="fontSizeTitle">Date/Battery/HR Font Size</string>
+    <string id="numberFontSizeTitle">Hour/Minute Digit Font Size</string>
+
+    <string id="FontSmall">Small</string>
+    <string id="FontMedium">Medium</string>
+    <string id="FontLarge">Large</string>
 
     <string id="ColorBlack">Black</string>
     <string id="ColorDarkGray">Dark Gray</string>

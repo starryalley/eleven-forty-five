@@ -12,6 +12,9 @@
     <property id="BatteryColor" type="number">0xAAAAAA</property>
     <property id="HRColor" type="number">0xAA0000</property>
 
+    <property id="fontSize" type="number">0</property>
+    <property id="numberFontSize" type="number">6</property>
+
     <property id="ShowDate" type="boolean">true</property>
     <property id="ShowHeartRate" type="boolean">false</property>
     <property id="ShowBattery" type="boolean">false</property>
